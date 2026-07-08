@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-
+const bcrypt = require("bcryptjs"); //for password hiding
+const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -42,5 +43,19 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
+//JWT TOKEN
+userSchema.methods.getJWTToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+// compare Password
+userSchema.methods.comaparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 module.exports = mongoose.model("User", userSchema);
