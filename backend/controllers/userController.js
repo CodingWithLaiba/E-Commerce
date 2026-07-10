@@ -158,7 +158,7 @@ exports.getSingleUserDetailsByAdmin = catchAsyncErrors(
     const user = await User.findById(req.params.id);
     if (!user) {
       return next(
-        new ErrorHander(`User does not exist with Id: ${req.params.id}`),
+        new ErrorHandler(`User does not exist with Id: ${req.params.id}`),
       );
     }
     res.status(200).json({
@@ -181,11 +181,12 @@ exports.updateUserRole = catchAsyncErrors(async (req, res, next) => {
   });
   if (!user) {
     return next(
-      new ErrorHander(`User does not exist with Id: ${req.params.id}`),
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 404),
     );
   }
   res.status(200).json({
     success: true,
+    user,
   });
 });
 
@@ -194,11 +195,12 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return next(
-      new ErrorHander(`User does not exist with Id: ${req.params.id}`),
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 404),
     );
   }
-  await user.remove();
+  await User.findByIdAndDelete(req.params.id);
   res.status(200).json({
     success: true,
+    message: "User Deleted Successfully",
   });
 });
